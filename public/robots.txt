@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://wude-dating-platform.onrender.com/sitemap.xml
+Sitemap: https://wude-backend.onrender.com/sitemap.xml
