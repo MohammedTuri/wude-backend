@@ -2,8 +2,15 @@ services:
   - type: web
     name: wude-dating-platform
     env: node
+    plan: free
     buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: wude_db
+          property: connectionString
+
+databases:
+  - name: wude_db
+    plan: free
