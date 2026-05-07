@@ -364,3 +364,47 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
 
 
 
+/* Mobile Responsive Fixes */
+@media (max-width: 768px) {
+    #top-nav {
+        padding: 10px 15px !important;
+        background: white !important;
+        height: 60px !important;
+        display: flex !important;
+        justify-content: center !important; /* Center the logo */
+    }
+    
+    #top-nav div:first-child {
+        font-size: 1.4rem !important;
+    }
+
+    #nav-actions {
+        display: none !important; /* Hide the redundant Login link on mobile */
+    }
+
+    .hero {
+        padding-top: 120px !important; /* Huge space from the fixed logo */
+        height: auto !important;
+        padding-bottom: 40px !important;
+        background: var(--bg-main) !important;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem !important; /* Even smaller to fit phone width */
+        line-height: 1.2 !important;
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .hero p {
+        font-size: 0.95rem !important;
+        margin-bottom: 20px !important;
+    }
+
+    #auth-section {
+        width: 95% !important;
+        margin: 20px auto !important;
+        padding: 20px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+}

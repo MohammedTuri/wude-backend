@@ -759,9 +759,11 @@ window.showMyProfile = async function() {
         container.innerHTML = `
         <div class="glass-card animate-up" style="max-width: 800px; margin: 0 auto 100px auto; padding: 40px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-md);">
             <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 30px;">
-                <div style="position: relative;">
-                    <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src=DEFAULT_PHOTO;" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary);">
-                    <div style="position: absolute; bottom: 5px; right: 5px; background: #10B981; width: 25px; height: 25px; border-radius: 50%; border: 4px solid var(--surface);"></div>
+                <div style="position: relative; cursor: pointer;" onclick="showPhotoManager()">
+                    <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src=DEFAULT_PHOTO;" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="position: absolute; bottom: 5px; right: 5px; background: var(--primary); width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--surface); display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="ph ph-camera" style="font-size: 1rem;"></i>
+                    </div>
                 </div>
                 <div>
                     <h2 style="font-size: 2.5rem; margin-bottom: 5px; color: var(--text-main);">${user.full_name}</h2>
@@ -841,37 +843,104 @@ window.showMyProfile = async function() {
     }
 }
 
-window.editMyProfile = async function() {
-    const newBio = prompt("Update your bio:", window.currentUser.bio || "");
-    if (newBio === null) return;
-    const newProfession = prompt("Update your profession:", window.currentUser.profession || "");
-    if (newProfession === null) return;
+window.editMyProfile = function() {
+    const user = window.currentUser;
+    const overlay = document.createElement('div');
+    overlay.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px;";
     
-    try {
-        const response = await fetch(`${API_URL}/users/${window.currentUser.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...window.currentUser,
-                bio: newBio,
-                profession: newProfession
-            })
-        });
-        const updatedUser = await response.json();
-        if (updatedUser.error) {
-            alert(updatedUser.error);
-            return;
-        }
+    overlay.innerHTML = `
+        <div class="glass-card animate-up" style="background: var(--surface); padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
+                <h2 style="color: var(--text-main); margin: 0;"><i class="ph ph-pencil-line"></i> Edit Profile</h2>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            
+            <form id="full-edit-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Full Name</label>
+                        <input type="text" name="full_name" value="${user.full_name || ''}" class="form-input" required>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Age</label>
+                        <input type="number" name="age" value="${user.age || ''}" class="form-input" required min="18">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Location (City, Country)</label>
+                        <input type="text" name="location" value="${user.location || ''}" class="form-input" required>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Profession</label>
+                        <input type="text" name="profession" value="${user.profession || ''}" class="form-input" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Marital Status</label>
+                        <select name="marital_status" class="form-input">
+                            <option value="Never Married" ${user.marital_status === 'Never Married' ? 'selected' : ''}>Never Married</option>
+                            <option value="Divorced" ${user.marital_status === 'Divorced' ? 'selected' : ''}>Divorced</option>
+                            <option value="Widowed" ${user.marital_status === 'Widowed' ? 'selected' : ''}>Widowed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Education</label>
+                        <input type="text" name="education" value="${user.education || ''}" class="form-input">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">About Me / Bio</label>
+                    <textarea name="bio" class="form-input" style="min-height: 120px; resize: vertical;">${user.bio || ''}</textarea>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 2; padding: 15px; font-size: 1.1rem;">Save All Changes</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#full-edit-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const updatedData = Object.fromEntries(formData.entries());
         
-        window.currentUser = updatedUser;
-        localStorage.setItem('wude_user', JSON.stringify(window.currentUser));
-        alert("Profile updated successfully!");
-        showMyProfile(); // refresh the view
-    } catch (err) {
-        console.error(err);
-        alert("Failed to update profile.");
-    }
-}
+        try {
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Saving Profile...';
+            submitBtn.disabled = true;
+
+            const response = await fetch(`${API_URL}/users/${user.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...user, ...updatedData })
+            });
+            const result = await response.json();
+            
+            if (result.error) throw new Error(result.error);
+            
+            window.currentUser = result;
+            localStorage.setItem('wude_user', JSON.stringify(window.currentUser));
+            overlay.remove();
+            alert("✨ Profile updated successfully!");
+            showMyProfile();
+        } catch (err) {
+            console.error("Update error:", err);
+            alert("Update failed: " + err.message);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    };
+};
 
 window.openProfileModal = async function(id) {
     const modal = document.getElementById('profile-modal');
@@ -962,3 +1031,113 @@ window.startDirectChatFromModal = function(userId, userName, userPhoto) {
         openChatPanel(userId, userName, userPhoto || DEFAULT_PHOTO);
     }, 100);
 }
+
+window.showPhotoManager = function() {
+    // Create a beautiful overlay modal
+    const overlay = document.createElement('div');
+    overlay.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);";
+    
+    overlay.innerHTML = `
+        <div class="glass-card animate-up" style="background: var(--surface); padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; border: 1px solid var(--border);">
+            <i class="ph ph-image-square" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+            <h2 style="margin-bottom: 10px; color: var(--text-main);">Upload Profile Photo</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Choose a clear photo of yourself. Max size 5MB.</p>
+            
+            <input type="file" id="photo-input" accept="image/*" style="display: none;">
+            
+            <label for="photo-input" style="display: block; background: var(--bg-main); border: 2px dashed var(--border); padding: 30px; border-radius: 12px; cursor: pointer; margin-bottom: 20px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--primary)'; this.style.background='rgba(183, 110, 48, 0.05)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)'">
+                <i class="ph ph-cloud-arrow-up" style="font-size: 2rem; color: var(--primary);"></i>
+                <span style="display: block; margin-top: 10px; font-weight: 600; color: var(--text-main);">Click to select photo</span>
+            </label>
+            
+            <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()" style="width: 100%;">Cancel</button>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    const input = overlay.querySelector('#photo-input');
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('photo', file);
+        formData.append('userId', window.currentUser.id);
+
+        try {
+            const container = overlay.querySelector('.glass-card');
+            container.innerHTML = `
+                <div style="padding: 40px;">
+                    <i class="ph ph-spinner animate-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+                    <h2 style="color: var(--text-main);">Uploading to Cloudinary...</h2>
+                    <p style="color: var(--text-muted);">Processing your beautiful photo</p>
+                </div>
+            `;
+            
+            const response = await fetch(`${API_URL}/upload-photo`, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                window.currentUser.photo_url = result.photo_url;
+                localStorage.setItem('wude_user', JSON.stringify(window.currentUser));
+                overlay.remove();
+                alert("✨ Photo updated successfully!");
+                showMyProfile();
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (err) {
+            alert("Upload failed: " + err.message);
+            overlay.remove();
+        }
+    };
+};
+
+window.updateUploadLabel = function(input) {
+    const labelText = document.getElementById('upload-label-text');
+    const submitBtn = document.getElementById('photo-submit-btn');
+    if (input.files && input.files[0]) {
+        labelText.textContent = "Selected: " + input.files[0].name;
+        labelText.style.color = "var(--primary)";
+        submitBtn.style.display = "block";
+    }
+};
+
+window.handlePhotoUpload = async function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('photo-file-input');
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('userId', window.currentUser.id);
+
+    try {
+        const submitBtn = document.getElementById('photo-submit-btn');
+        submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Uploading to Cloudinary...';
+        submitBtn.disabled = true;
+
+        const response = await fetch(`${API_URL}/upload-photo`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            window.currentUser.photo_url = result.photo_url;
+            localStorage.setItem('wude_user', JSON.stringify(window.currentUser));
+            alert("✨ Photo uploaded successfully!");
+            showMyProfile(); // Refresh to show the new photo
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (err) {
+        alert("Upload failed: " + err.message);
+        showMyProfile();
+    }
+};

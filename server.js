@@ -7,6 +7,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,16 +22,20 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve frontend from this folder
 
-// Multer Setup
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, 'public', 'uploads');
-        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '-'));
-    }
+// Cloudinary Config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'wude_profiles',
+    allowed_formats: ['jpg', 'png', 'jpeg'],
+    transformation: [{ width: 600, height: 600, crop: 'limit' }]
+  },
 });
 const upload = multer({ storage: storage });
 
@@ -482,6 +488,27 @@ app.get('/api/likes/mutual/:userId', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Upload Photo to Cloudinary
+app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        const photoUrl = req.file.path; // Cloudinary URL
+
+        await pool.query(
+            'UPDATE wude_users SET photo_url = $1 WHERE id = $2',
+            [photoUrl, userId]
+        );
+
+        res.json({ success: true, photo_url: photoUrl });
+    } catch (err) {
+        console.error('Upload failed:', err.message);
+        res.status(500).json({ error: 'Failed to upload photo' });
     }
 });
 
