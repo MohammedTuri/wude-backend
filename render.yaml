@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: wude-dating-platform
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
