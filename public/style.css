@@ -506,17 +506,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         grid-template-columns: 1fr !important;
     }
     
-    .modal-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 100% !important;
-        max-height: 100vh !important;
-        border-radius: 0 !important;
-        margin: 0 !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 120px !important;
-    }
+\n    .modal-overlay {\n        padding: 0 !important;\n    }\n\n    .modal-content {\n        width: 100% !important;\n        max-width: 100% !important;\n        height: 100% !important;\n        max-height: 100vh !important;\n        border-radius: 0 !important;\n        margin: 0 !important;\n        overflow-y: scroll !important;\n        -webkit-overflow-scrolling: touch;\n        padding-bottom: 120px !important;\n    }\n\n    /* Make scrollbar visible */\n    .modal-content::-webkit-scrollbar {\n        width: 6px !important;\n        display: block !important;\n    }\n    .modal-content::-webkit-scrollbar-thumb {\n        background: rgba(183, 110, 48, 0.4) !important;\n        border-radius: 10px !important;\n    }\n
 
     #active-chat-panel {
         width: 100% !important;
