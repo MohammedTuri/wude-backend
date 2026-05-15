@@ -389,6 +389,20 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
 }
 
 /* Mobile Responsive Fixes */
+
+/* Global Modal Scrollbar Styles */
+.modal-content::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(183, 110, 48, 0.3) !important;
+    border-radius: 10px !important;
+}
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
 @media (max-width: 768px) {
     #top-nav {
         padding: 10px 15px !important;
