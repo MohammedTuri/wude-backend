@@ -362,8 +362,6 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     #bio-data-card { position: absolute; left: 0; top: 0; width: 100%; }
 }
 
-
-
 /* Mobile Responsive Fixes */
 @media (max-width: 768px) {
     #top-nav {
@@ -371,7 +369,9 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         background: white !important;
         height: 60px !important;
         display: flex !important;
-        justify-content: center !important; /* Center the logo */
+        justify-content: center !important;
+        width: 100% !important;
+        left: 0 !important;
     }
     
     #top-nav div:first-child {
@@ -379,33 +379,64 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     }
 
     #nav-actions {
-        display: none !important; /* Hide the redundant Login link on mobile */
+        display: none !important;
     }
 
     .hero {
-        padding-top: 120px !important; /* Huge space from the fixed logo */
+        padding-top: 120px !important;
         height: auto !important;
         padding-bottom: 40px !important;
         background: var(--bg-main) !important;
     }
 
     .hero h1 {
-        font-size: 1.8rem !important; /* Even smaller to fit phone width */
+        font-size: 1.8rem !important;
         line-height: 1.2 !important;
-        margin-top: 10px !important;
-        margin-bottom: 10px !important;
     }
 
     .hero p {
         font-size: 0.95rem !important;
-        margin-bottom: 20px !important;
     }
 
     #auth-section {
         width: 95% !important;
         margin: 20px auto !important;
         padding: 20px !important;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+
+    /* Responsive Navigation (Bottom Bar for Mobile) */
+    .icon-rail {
+        width: 100% !important;
+        height: 64px !important;
+        bottom: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        padding-top: 0 !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        border-right: none !important;
+        border-top: 1px solid var(--border) !important;
+        gap: 0 !important;
+        z-index: 2000 !important;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+
+    .rail-item {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0 !important;
+        font-size: 1.2rem !important;
+    }
+
+    .rail-item::after { display: none !important; }
+    .rail-spacer { display: none !important; }
+    
+    .feed-container {
+        padding-bottom: 80px !important;
+    }
+
+    body {
+        padding-left: 0 !important;
     }
 
     /* Profile Modal Mobile Fixes */
@@ -419,10 +450,6 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         height: 250px !important;
     }
 
-    .hero-name {
-        font-size: 1.8rem !important;
-    }
-
     .profile-content-scrollable {
         padding: 20px !important;
     }
@@ -430,7 +457,6 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     .action-buttons {
         flex-direction: column !important;
         gap: 10px !important;
-        padding: 15px !important;
     }
 
     .action-buttons .btn {
