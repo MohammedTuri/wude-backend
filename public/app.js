@@ -902,7 +902,7 @@ window.openProfileModal = async function(id) {
     document.body.style.overflow = 'hidden';
     const modal = document.getElementById('profile-modal');
     const modalBody = document.getElementById('modal-body');
-    modal.style.display = 'flex';
+    modal.style.setProperty('display', 'flex', 'important');\n    console.log('Modal opened for ID:', id);
     modalBody.innerHTML = '<div style="padding: 40px; text-align: center;"><i class="ph ph-spinner animate-spin" style="font-size: 2rem;"></i><br>Loading profile...</div>';
 
     try {
@@ -999,7 +999,7 @@ window.likeUser = async function(receiverId) {
 window.closeModal = function() {
     document.body.style.overflow = 'auto';
     const modal = document.getElementById('profile-modal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {\n        modal.style.setProperty('display', 'none', 'important');\n        console.log('Modal closed');\n    }
 }
 
 window.startDirectChatFromModal = function(userId, userName, userPhoto) {

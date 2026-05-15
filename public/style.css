@@ -408,7 +408,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         padding: 10px 15px !important;
         background: white !important;
         height: 60px !important;
-        display: flex !important;
+        display: flex;
         justify-content: center !important;
         width: 100% !important;
         left: 0 !important;
