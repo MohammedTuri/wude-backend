@@ -47,6 +47,7 @@ const pool = new Pool({
 // Debug Route
 app.get('/api/debug-env', (req, res) => {
     res.json({
+        SERVICE_NAME: process.env.RENDER_SERVICE_NAME || 'Unknown',
         CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'OK' : 'MISSING',
         CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING',
         CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING',
