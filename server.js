@@ -23,6 +23,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve frontend from this folder
 
 // Cloudinary Config
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    console.warn("WARNING: Cloudinary environment variables are missing. Photo uploads will fail.");
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -40,9 +44,10 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 // Database Connection
+const connectionString = process.env.DATABASE_URL || '';
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL.includes('localhost') || process.env.DATABASE_URL.includes('127.0.0.1') 
+  connectionString: connectionString,
+  ssl: connectionString.includes('localhost') || connectionString.includes('127.0.0.1') || connectionString === ''
     ? false 
     : { rejectUnauthorized: false }
 });
@@ -539,6 +544,19 @@ app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
         console.error('Photo upload/DB error:', err.message);
         res.status(500).json({ error: 'Server error: ' + err.message });
     }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Unhandled Server Error:', err);
+    if (err instanceof multer.MulterError) {
+        return res.status(400).json({ error: 'Upload Error: ' + err.message });
+    }
+    res.status(500).json({ 
+        error: 'Critical Server Error', 
+        details: err.message,
+        path: req.path
+    });
 });
 
 app.listen(port, () => {
