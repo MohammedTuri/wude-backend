@@ -96,7 +96,7 @@ async function handleAuth(event, type) {
         }
 
         console.log(`Sending ${type} payload:`, payload);
-        const response = await fetch('/api/' + type, {
+        const response = await fetch(`${API_URL}/${type}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -293,7 +293,7 @@ async function loadProfiles() {
                     <div style="position: relative; overflow: hidden; height: 350px;">
                         <img src="${profile.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src=DEFAULT_PHOTO;" class="profile-img" style="height: 100%;">
                     </div>
-                    <div class="profile-info" style="padding: 15px;">
+                    <div class="profile-inf✨ style="padding: 15px;">
                         <div class="profile-name" style="font-size: 1.3rem;">${profile.full_name}, ${profile.age}</div>
                         <div class="profile-meta">${profile.location}</div>
                     </div>
@@ -339,7 +339,7 @@ async function loadDiscoveryProfiles(filters = {}) {
                         ${filters.sort === 'newest' ? '<div style="position: absolute; top: 10px; left: 10px; background: #2ecc71; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem;">New</div>' : ''}
                         ${profile.is_premium ? '<div style="position: absolute; top: 10px; right: 10px; background: var(--rose-gold); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem;"><i class="ph ph-crown"></i> Elite</div>' : ''}
                     </div>
-                    <div class="profile-info" style="padding: 15px;">
+                    <div class="profile-inf✨ style="padding: 15px;">
                         <div class="profile-name" style="font-size: 1.2rem;">${profile.full_name}, ${profile.age}</div>
                         <div class="profile-meta">${profile.location}</div>
                     </div>
@@ -700,7 +700,7 @@ async function loadLikes(type) {
                             ${type === 'mutual' ? 'Matched ✨' : 'Interested'}
                         </div>
                     </div>
-                    <div class="profile-info" style="padding: 15px;">
+                    <div class="profile-inf✨ style="padding: 15px;">
                         <div class="profile-name" style="font-size: 1.2rem;">${profile.full_name}, ${profile.age}</div>
                         <div class="profile-meta">${profile.location}</div>
                         ${actionButtons}
@@ -803,7 +803,7 @@ window.showMyProfile = async function() {
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <div style="background: var(--bg-main); border: 1px solid var(--border); padding: 25px; border-radius: 12px;">
-                    <h3 style="margin-bottom: 20px; color: var(--primary); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="ph ph-info"></i> Basic Information</h3>
+                    <h3 style="margin-bottom: 20px; color: var(--primary); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="ph ph-inf✨></i> Basic Information</h3>
                     <div style="display: flex; flex-direction: column; gap: 15px;">
                         <div style="display: flex; justify-content: space-between;">
                             <span style="color: var(--text-muted);">Location</span>
@@ -921,7 +921,7 @@ window.editMyProfile = function() {
 
                 <div style="margin-bottom: 25px;">
                     <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">About Me / Bio</label>
-                    <textarea name="bio" class="form-input" style="min-height: 120px; resize: vertical;">${user.bio || ''}</textarea>
+                    <textarea name="bi✨ class="form-input" style="min-height: 120px; resize: vertical;">${user.bio || ''}</textarea>
                 </div>
 
                 <div style="display: flex; gap: 15px;">
@@ -1134,6 +1134,7 @@ window.handlePhotoUpload = async function(e) {
 };
 
 
+
 window.openProfileModal = async function(id) {
     const modal = document.getElementById('profile-modal');
     const modalBody = document.getElementById('modal-body');
@@ -1211,13 +1212,14 @@ window.likeUser = async function(receiverId) {
 }
 
 window.closeModal = function() {
-    document.getElementById('profile-modal').style.display = 'none';
+    const modal = document.getElementById('profile-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 window.startDirectChatFromModal = function(userId, userName, userPhoto) {
-    closeModal();
-    showChat();
+    window.closeModal();
+    window.showChat();
     setTimeout(() => {
-        openChatPanel(userId, userName, userPhoto || DEFAULT_PHOTO);
+        window.openChatPanel(userId, userName, userPhoto || DEFAULT_PHOTO);
     }, 100);
 }
