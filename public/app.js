@@ -899,73 +899,72 @@ window.editMyProfile = function() {
 };
 
 window.openProfileModal = async function(id) {
-    document.body.style.overflow = 'hidden';
+    console.log('Attempting to open profile:', id);
     const modal = document.getElementById('profile-modal');
     const modalBody = document.getElementById('modal-body');
-    modal.style.setProperty('display', 'flex', 'important');\n    console.log('Modal opened for ID:', id);
-    modalBody.innerHTML = '<div style="padding: 40px; text-align: center;"><i class="ph ph-spinner animate-spin" style="font-size: 2rem;"></i><br>Loading profile...</div>';
+    if (!modal || !modalBody) return;
+
+    modal.style.setProperty('display', 'flex', 'important');
+    document.body.style.overflow = 'hidden';
+    modalBody.innerHTML = '<div style="padding: 100px; text-align: center; color: #666;"><i class="ph ph-spinner animate-spin" style="font-size: 3rem;"></i><br><br>Loading Profile Details...</div>';
 
     try {
         const response = await fetch(`${API_URL}/profiles/${id}`);
+        if (!response.ok) {
+            modalBody.innerHTML = `<div style="padding: 100px; text-align: center; color: red;"><h3>Server Error</h3><p>Could not fetch profile (Status: ${response.status})</p></div>`;
+            return;
+        }
+
         const user = await response.json();
-        
         if (!user || user.error || Object.keys(user).length === 0) {
-            modalBody.innerHTML = `<div style="padding: 40px; text-align: center;">${user ? user.error : 'User not found'}</div>`;
+            modalBody.innerHTML = `<div style="padding: 100px; text-align: center; color: #dc2626;"><h3>Profile Not Found</h3><p>The requested profile could not be loaded.</p></div>`;
             return;
         }
 
         modalBody.innerHTML = `
             <div class="modal-profile-header" style="display: block;">
-                <div style="width: 100%; border-radius: 12px; overflow: hidden; height: 350px; background: #f0f0f0; margin-bottom: 20px;">
+                <div style="width: 100%; border-radius: 12px; overflow: hidden; height: 350px; background: #eee; margin-bottom: 20px;">
                     <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src='${DEFAULT_PHOTO}';" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <div style="padding: 0 10px;">
-                    <h2 style="font-size: 2.2rem; margin-bottom: 5px; color: var(--text-main); text-align: left;">${user.full_name}, ${user.age}</h2>
-                    <p style="color: var(--primary); font-weight: 600; font-size: 1.1rem; margin-bottom: 25px; text-align: left;"><i class="ph ph-map-pin"></i> ${user.location || 'Unknown'}</p>
+                <div style="padding: 0 15px;">
+                    <h2 style="font-size: 2.2rem; margin-bottom: 5px; color: #111827; text-align: left;">${user.full_name}, ${user.age}</h2>
+                    <p style="color: #b76e30; font-weight: 600; font-size: 1.1rem; margin-bottom: 25px; text-align: left;"><i class="ph ph-map-pin"></i> ${user.location || 'Unknown'}</p>
                     
                     <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 30px;">
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <strong style="color: #64748b; display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Profession</strong>
-                            <span style="color: #1e293b; font-weight: 600;">${user.profession || 'Not specified'}</span>
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
+                            <strong style="color: #6b7280; display: block; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 4px;">Profession</strong>
+                            <span style="color: #111827; font-weight: 600;">${user.profession || 'Not specified'}</span>
                         </div>
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <strong style="color: #64748b; display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Education</strong>
-                            <span style="color: #1e293b; font-weight: 600;">${user.education || 'Not specified'}</span>
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
+                            <strong style="color: #6b7280; display: block; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 4px;">Education</strong>
+                            <span style="color: #111827; font-weight: 600;">${user.education || 'Not specified'}</span>
                         </div>
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <strong style="color: #64748b; display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Religion</strong>
-                            <span style="color: #1e293b; font-weight: 600;">${user.religion_practice || 'Not specified'}</span>
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
+                            <strong style="color: #6b7280; display: block; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 4px;">Religion</strong>
+                            <span style="color: #111827; font-weight: 600;">${user.religion_practice || 'Not specified'}</span>
                         </div>
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <strong style="color: #64748b; display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Marriage Timeline</strong>
-                            <span style="color: #1e293b; font-weight: 600;">${user.marriage_timeline || 'Not specified'}</span>
-                        </div>
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <strong style="color: #64748b; display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Height</strong>
-                            <span style="color: #1e293b; font-weight: 600;">${user.height || 'Not specified'}</span>
-                        </div>
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <strong style="color: #64748b; display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Children Plans</strong>
-                            <span style="color: #1e293b; font-weight: 600;">${user.children_plans || 'Not specified'}</span>
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
+                            <strong style="color: #6b7280; display: block; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 4px;">Marriage Timeline</strong>
+                            <span style="color: #111827; font-weight: 600;">${user.marriage_timeline || 'Not specified'}</span>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div style="background: #fff; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 30px; text-align: left; box-shadow: var(--shadow-sm); margin: 0 10px 30px 10px;">
-                <h3 style="margin-bottom: 12px; color: var(--primary); font-size: 1.2rem; font-family: 'Playfair Display', serif;">About Me</h3>
-                <p style="color: var(--text-main); line-height: 1.7; font-size: 1.05rem;">${user.bio || 'No bio provided.'}</p>
+            <div style="background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 12px; margin: 0 15px 30px 15px; text-align: left;">
+                <h3 style="margin-bottom: 12px; color: #b76e30; font-size: 1.2rem;">About Me</h3>
+                <p style="color: #374151; line-height: 1.7; font-size: 1.05rem;">${user.bio || 'No bio provided.'}</p>
             </div>
 
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; background: white; padding: 25px 20px; border-top: 1px solid var(--border); margin: 20px -20px -20px -20px; z-index: 10;">
-                <button class="btn btn-primary" onclick="likeUser(${user.id})" style="flex: 2; padding: 16px; font-size: 1.1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-heart-fill" style="font-size: 1.4rem;"></i> Like & Connect</button>
-                <button class="btn btn-primary" onclick="startDirectChatFromModal(${user.id}, '${(user.full_name || '').replace(/'/g,'\\\\\'')}', '${(user.photo_url || '').replace(/'/g,'\\\\\'')}')" style="flex: 1.5; padding: 16px; font-size: 1.1rem; background: #059669; border-color: #059669; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-chat-circle-fill" style="font-size: 1.4rem;"></i> Chat</button>
-                <button class="btn" onclick="rejectLike(${user.id})" style="flex: 1; padding: 16px; background: #fee2e2; color: #dc2626; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class="ph ph-x-bold"></i></button>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; background: #f9fafb; padding: 20px; border-top: 1px solid #eee; margin: 0 -20px -20px -20px;">
+                <button class="btn btn-primary" onclick="likeUser(${user.id})" style="flex: 2; padding: 16px; font-size: 1.1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-heart-fill"></i> Like & Connect</button>
+                <button class="btn btn-primary" onclick="startDirectChatFromModal(${user.id}, '${(user.full_name || '').replace(/'/g,'\\\\\'')}', '${(user.photo_url || '').replace(/'/g,'\\\\\'')}')" style="flex: 1.5; padding: 16px; font-size: 1.1rem; background: #059669; border-color: #059669; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-chat-circle-fill"></i> Chat</button>
+                <button class="btn" onclick="rejectLike(${user.id})" style="flex: 1; padding: 16px; background: #fee2e2; color: #dc2626; border: none; border-radius: 12px; display: flex; align-items: center; justify-content: center;"><i class="ph ph-x-bold"></i></button>
             </div>
         `;
     } catch (err) {
-        console.error('Modal error:', err);
-        modalBody.innerHTML = '<div style="padding: 40px; text-align: center;">Failed to load profile details.</div>';
+        console.error('Modal Fetch Error:', err);
+        modalBody.innerHTML = `<div style="padding: 100px; text-align: center; color: red;"><h3>Connection Error</h3><p>${err.message}</p></div>`;
     }
 }
 
