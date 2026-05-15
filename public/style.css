@@ -588,3 +588,50 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     padding: 0 !important;
     width: 100% !important;
 }
+
+/* --- Consolidated Modal System --- */
+.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(17, 24, 39, 0.8) !important;
+    backdrop-filter: blur(4px) !important;
+    z-index: 2000 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    padding: 40px 20px !important;
+    overflow-y: auto !important;
+}
+
+.modal-content {
+    background: white !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    border-radius: 20px !important;
+    position: relative !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
+    overflow: hidden !important;
+    margin-bottom: 40px !important;
+    min-height: 400px !important;
+}
+
+.close-btn {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: white !important;
+    border: 1px solid #eee !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    font-size: 1.5rem !important;
+    cursor: pointer !important;
+    z-index: 100 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+}
