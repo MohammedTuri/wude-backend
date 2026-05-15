@@ -22,14 +22,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'))); 
 
-// --- DIAGNOSTICS ---
-console.log('--- Startup Diagnostics ---');
-console.log('Env Keys:', Object.keys(process.env).filter(k => k.includes('CLOUD') || k.includes('API')).join(', '));
-console.log('CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'OK' : 'MISSING');
-console.log('API_KEY:', process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING');
-console.log('API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING');
-console.log('---------------------------');
-
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -52,25 +44,14 @@ const pool = new Pool({
   ssl: (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')) ? false : { rejectUnauthorized: false }
 });
 
-// Auto-init DB
-const initDb = async () => {
-    try {
-        const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-        await pool.query(schema);
-        console.log('Database Ready');
-    } catch (err) {
-        console.error('Database Init Failed:', err.message);
-    }
-};
-initDb();
-
 // Debug Route
 app.get('/api/debug-env', (req, res) => {
     res.json({
         CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'OK' : 'MISSING',
         CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING',
         CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING',
-        ALL_KEYS: Object.keys(process.env).filter(k => k.includes('CLOUD') || k.includes('API')),
+        DATABASE_URL: process.env.DATABASE_URL ? 'OK' : 'MISSING',
+        ALL_KEYS: Object.keys(process.env).sort(),
         TIME: new Date().toISOString()
     });
 });
