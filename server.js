@@ -174,6 +174,25 @@ app.get('/api/conversations/:userId', async (req, res) => {
     }
 });
 
+
+app.get('/api/messages/:id1/:id2', async (req, res) => {
+    try {
+        const { id1, id2 } = req.params;
+        const result = await pool.query(`
+            SELECT * FROM wude_messages 
+            WHERE match_id IN (
+                SELECT id FROM wude_matches 
+                WHERE (user_one = $1 AND user_two = $2)
+                   OR (user_one = $2 AND user_two = $1)
+            )
+            ORDER BY created_at ASC
+        `, [id1, id2]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/matches/:matchId/messages', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM wude_messages WHERE match_id = $1 ORDER BY created_at ASC', [req.params.matchId]);
