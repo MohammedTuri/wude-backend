@@ -720,39 +720,10 @@ window.showToast = function(msg) {
 }
 
 window.showMyProfile = async function() {
-            modalBody.innerHTML = `
-            <div class="modal-profile-header">
-                <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src='${DEFAULT_PHOTO}';" class="modal-profile-img">
-                <div style="flex: 1;">
-                    <h2 style="font-size: 2rem; margin-bottom: 5px; color: var(--text-main); text-align: left;">${user.full_name}, ${user.age}</h2>
-                    <p style="color: var(--primary); font-weight: 600; font-size: 1.1rem; margin-bottom: 15px; text-align: left;"><i class="ph ph-map-pin"></i> ${user.location}</p>
-                    
-                    <div class="modal-profile-grid">
-                        <div><strong style="color: var(--text-muted);">Profession:</strong> ${user.profession || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Education:</strong> ${user.education || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Religion:</strong> ${user.religion_practice || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Timeline:</strong> ${user.marriage_timeline || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Height:</strong> ${user.height || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Children:</strong> ${user.children_plans || 'Not specified'}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="background: var(--bg-main); border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: left;">
-                <h3 style="margin-bottom: 10px; color: var(--primary); font-size: 1.2rem;">About Me</h3>
-                <p style="color: var(--text-main); line-height: 1.6;">${user.bio || 'No bio provided.'}</p>
-            </div>
-
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="likeUser(${user.id})" style="flex: 2; padding: 15px; font-size: 1rem; min-width: 130px;"><i class="ph ph-heart"></i> Like & Connect</button>
-                <button class="btn btn-primary" onclick="startDirectChatFromModal(${user.id}, '${(user.full_name || '').replace(/'/g,'\\\\\'')}', '${(user.photo_url || '').replace(/'/g,'\\\\\'')}')" style="flex: 1.5; padding: 15px; font-size: 1rem; background: #059669; border-color: #059669; min-width: 100px;"><i class="ph ph-chat-circle"></i> Chat</button>
-                <button class="btn" onclick="rejectLike(${user.id})" style="flex: 1; padding: 15px; min-width: 80px; background: var(--danger); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Pass</button>
-            </div>
-        `;
-    } catch (err) {
-        modalBody.innerHTML = '<div style="padding: 40px; text-align: center;">Failed to load profile details.</div>';
+    if (!window.currentUser) {
+        alert("Please login to view your profile.");
+        return;
     }
-}
 
     hideAllSections();
     const feed = document.getElementById('feed');
@@ -777,151 +748,91 @@ window.showMyProfile = async function() {
         const response = await fetch(`${API_URL}/profiles/${window.currentUser.id}`);
         const user = await response.json();
         
-        if (user.error) throw new Error(user.error);
-        
-        // Update local state if needed
-        window.currentUser = { ...window.currentUser, ...user };
+        if (user.error) {
+            container.innerHTML = `<div style="padding: 40px; text-align: center;">${user.error}</div>`;
+            return;
+        }
 
         container.innerHTML = `
-        <div class="glass-card animate-up" style="max-width: 800px; margin: 0 auto 100px auto; padding: 40px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-md);">
-            <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 30px;">
-                <div style="position: relative; cursor: pointer;" onclick="showPhotoManager()">
-                    <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src=DEFAULT_PHOTO;" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                    <div style="position: absolute; bottom: 5px; right: 5px; background: var(--primary); width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--surface); display: flex; align-items: center; justify-content: center; color: white;">
-                        <i class="ph ph-camera" style="font-size: 1rem;"></i>
-                    </div>
-                </div>
-                <div>
-                    <h2 style="font-size: 2.5rem; margin-bottom: 5px; color: var(--text-main);">${user.full_name}</h2>
-                    <p style="color: var(--primary); font-weight: 600; font-size: 1.1rem;"><i class="ph ph-envelope"></i> ${user.email}</p>
-                    <div style="margin-top: 15px; display: flex; gap: 10px;">
-                        <span style="background: var(--bg-main); border: 1px solid var(--border); padding: 4px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Verified Member</span>
-                        <span style="background: var(--bg-main); border: 1px solid var(--border); padding: 4px 12px; border-radius: 6px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Marriage Intent</span>
+            <div class="profile-header-card" style="background: white; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 30px;">
+                <div style="height: 150px; background: linear-gradient(135deg, var(--primary), var(--rose-gold));"></div>
+                <div style="padding: 0 30px 30px 30px; margin-top: -60px; text-align: center;">
+                    <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src='${DEFAULT_PHOTO}';" style="width: 120px; height: 120px; border-radius: 50%; border: 5px solid white; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                    <h2 style="font-size: 2rem; margin-bottom: 5px;">${user.full_name}, ${user.age}</h2>
+                    <p style="color: var(--primary); font-weight: 600;"><i class="ph ph-map-pin"></i> ${user.location}</p>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="editMyProfile()"><i class="ph ph-pencil-simple"></i> Edit Profile</button>
+                        <button class="btn btn-secondary" onclick="showPhotoManager()"><i class="ph ph-camera"></i> Change Photo</button>
                     </div>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <div style="background: var(--bg-main); border: 1px solid var(--border); padding: 25px; border-radius: 12px;">
-                    <h3 style="margin-bottom: 20px; color: var(--primary); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="ph ph-inf✨></i> Basic Information</h3>
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Location</span>
-                            <span style="font-weight: 600; color: var(--text-main);">${user.location || 'Not specified'}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Age</span>
-                            <span style="font-weight: 600; color: var(--text-main);">${user.age || 'Not specified'} Years</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Gender</span>
-                            <span style="font-weight: 600; text-transform: capitalize; color: var(--text-main);">${user.gender || 'Not specified'}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Profession</span>
-                            <span style="font-weight: 600; color: var(--text-main);">${user.profession || 'Not specified'}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="background: var(--bg-main); border: 1px solid var(--border); padding: 25px; border-radius: 12px;">
-                    <h3 style="margin-bottom: 20px; color: var(--primary); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="ph ph-heart"></i> Personal Values</h3>
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Education</span>
-                            <span style="font-weight: 600; color: var(--text-main);">${user.education || 'Not specified'}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Practice</span>
-                            <span style="font-weight: 600; color: var(--text-main);">${user.religion_practice || 'Practicing'}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Status</span>
-                            <span style="font-weight: 600; color: var(--text-main);">${user.marital_status || 'Not specified'}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-muted);">Timeline</span>
-                            <span style="font-weight: 600; color: var(--text-main);">${user.marriage_timeline || 'Within 1 year'}</span>
-                        </div>
-                    </div>
+            <div class="glass-card" style="padding: 30px; margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--primary);">Personal Details</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div><strong style="color: var(--text-muted);">Profession:</strong> ${user.profession || 'Not specified'}</div>
+                    <div><strong style="color: var(--text-muted);">Education:</strong> ${user.education || 'Not specified'}</div>
+                    <div><strong style="color: var(--text-muted);">Religion:</strong> ${user.religion_practice || 'Not specified'}</div>
+                    <div><strong style="color: var(--text-muted);">Timeline:</strong> ${user.marriage_timeline || 'Not specified'}</div>
+                    <div><strong style="color: var(--text-muted);">Height:</strong> ${user.height || 'Not specified'}</div>
+                    <div><strong style="color: var(--text-muted);">Children:</strong> ${user.children_plans || 'Not specified'}</div>
+                    <div><strong style="color: var(--text-muted);">Income:</strong> ${user.income || 'Not specified'}</div>
+                    <div><strong style="color: var(--text-muted);">Marital Status:</strong> ${user.marital_status || 'Not specified'}</div>
                 </div>
             </div>
 
-            <div style="margin-top: 30px; background: var(--bg-main); border: 1px solid var(--border); padding: 25px; border-radius: 12px;">
-                <h3 style="margin-bottom: 10px; color: var(--text-main); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;">About Me</h3>
-                <p style="color: #666; line-height: 1.6;">${user.bio || "Searching for a lifelong partner who values tradition and family."}</p>
+            <div class="glass-card" style="padding: 30px;">
+                <h3 style="margin-bottom: 15px; color: var(--primary);">My Bio</h3>
+                <p style="line-height: 1.8; color: var(--text-main); font-size: 1.1rem;">${user.bio || 'No bio provided yet.'}</p>
             </div>
-
-            <div style="display: flex; gap: 15px; margin-top: 40px;">
-                <button class="btn btn-primary" onclick="editMyProfile()" style="flex: 2; padding: 15px; font-size: 1.1rem;"><i class="ph ph-pencil"></i> Edit Full Profile</button>
-                <button class="btn btn-secondary" onclick="showPhotoManager()" style="flex: 1; padding: 15px;"><i class="ph ph-camera"></i> Update Photos</button>
-            </div>
-        </div>
         `;
     } catch (err) {
-        console.error("Profile Fetch Error:", err);
-        if (err.message === "Profile not found") {
-            alert("Your session has expired or your profile was removed. Please log in again.");
-            logout();
-        } else {
-            container.innerHTML = `<div style="padding: 40px; text-align: center; color: red;">Failed to load profile data: ${err.message}</div>`;
-        }
+        container.innerHTML = '<div style="padding: 40px; text-align: center;">Failed to load profile.</div>';
     }
 }
 
 window.editMyProfile = function() {
-    const user = window.currentUser;
     const overlay = document.createElement('div');
-    overlay.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px;";
+    overlay.className = 'modal-overlay';
+    overlay.style.display = 'flex';
+    overlay.style.zIndex = '10001';
     
     overlay.innerHTML = `
-        <div class="glass-card animate-up" style="background: var(--surface); padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
-                <h2 style="color: var(--text-main); margin: 0;"><i class="ph ph-pencil-line"></i> Edit Profile</h2>
-                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
-            </div>
+        <div class="glass-card animate-up" style="max-width: 600px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 30px;">
+            <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 25px; color: var(--primary);">Edit Profile Details</h2>
             
             <form id="full-edit-form">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Full Name</label>
-                        <input type="text" name="full_name" value="${user.full_name || ''}" class="form-input" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem;">Full Name</label>
+                        <input type="text" name="full_name" value="${window.currentUser.full_name}" class="form-input" required>
                     </div>
-                    <div>
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Age</label>
-                        <input type="number" name="age" value="${user.age || ''}" class="form-input" required min="18">
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem;">Age</label>
+                        <input type="number" name="age" value="${window.currentUser.age}" class="form-input" required>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem;">Location</label>
+                    <input type="text" name="location" value="${window.currentUser.location}" class="form-input" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem;">Profession</label>
+                        <input type="text" name="profession" value="${window.currentUser.profession || ''}" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem;">Height</label>
+                        <input type="text" name="height" value="${window.currentUser.height || ''}" class="form-input">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Location (City, Country)</label>
-                        <input type="text" name="location" value="${user.location || ''}" class="form-input" required>
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Profession</label>
-                        <input type="text" name="profession" value="${user.profession || ''}" class="form-input" required>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Marital Status</label>
-                        <select name="marital_status" class="form-input">
-                            <option value="Never Married" ${user.marital_status === 'Never Married' ? 'selected' : ''}>Never Married</option>
-                            <option value="Divorced" ${user.marital_status === 'Divorced' ? 'selected' : ''}>Divorced</option>
-                            <option value="Widowed" ${user.marital_status === 'Widowed' ? 'selected' : ''}>Widowed</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Education</label>
-                        <input type="text" name="education" value="${user.education || ''}" class="form-input">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main);">About Me / Bio</label>
-                    <textarea name="bi✨ class="form-input" style="min-height: 120px; resize: vertical;">${user.bio || ''}</textarea>
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem;">Bio</label>
+                    <textarea name="bio" class="form-input" style="min-height: 120px; resize: vertical;">${window.currentUser.bio || ''}</textarea>
                 </div>
 
                 <div style="display: flex; gap: 15px;">
@@ -937,7 +848,6 @@ window.editMyProfile = function() {
     const editForm = overlay.querySelector('#full-edit-form');
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log("Profile Edit: Form submitted!");
         
         const formData = new FormData(e.target);
         const updatedData = Object.fromEntries(formData.entries());
@@ -949,20 +859,15 @@ window.editMyProfile = function() {
             submitBtn.disabled = true;
 
             const payload = { ...window.currentUser, ...updatedData };
-            // Ensure age is an integer
             if (payload.age) payload.age = parseInt(payload.age);
             
-            console.log("Sending update payload:", payload);
-
-            const response = await fetch(`${API_URL}/users/${user.id}`, {
+            const response = await fetch(`${API_URL}/users/${window.currentUser.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             
             const result = await response.json();
-            console.log("Update response received:", result);
-            
             if (result.error) throw new Error(result.error);
             
             window.currentUser = result;
@@ -971,169 +876,15 @@ window.editMyProfile = function() {
             alert("✨ Profile updated successfully!");
             showMyProfile();
         } catch (err) {
-            console.error("Update failed error:", err);
             alert("Update failed: " + err.message);
             const submitBtn = e.target.querySelector('button[type="submit"]');
             if (submitBtn) {
-                submitBtn.innerHTML = originalText;
+                submitBtn.innerHTML = 'Save All Changes';
                 submitBtn.disabled = false;
             }
         }
-        alert("Please login to connect with members.");
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_URL}/like`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ senderId: window.currentUser.id, receiverId })
-        });
-        const data = await response.json();
-        
-        if (data.status === 'MATCHED') {
-            alert("✨ IT'S A MATCH! You can now start a conversation.");
-            closeModal();
-            // Automatically show chat or mutual likes
-            // window.showLikes('mutual');
-        } else {
-            alert("Interest sent! We'll let you know if they match back.");
-            closeModal();
-        }
-    } catch (err) {
-        console.error('Like failed:', err);
-        alert("Failed to send interest. Please try again later.");
-    }
-}
-
-window.closeModal = function() {
-    document.getElementById('profile-modal').style.display = 'none';
-}
-
-window.startDirectChatFromModal = function(userId, userName, userPhoto) {
-    closeModal();
-    showChat();
-    setTimeout(() => {
-        openChatPanel(userId, userName, userPhoto || DEFAULT_PHOTO);
-    }, 100);
-}
-
-window.showPhotoManager = function() {
-    // Create a beautiful overlay modal
-    const overlay = document.createElement('div');
-    overlay.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);";
-    
-    overlay.innerHTML = `
-        <div class="glass-card animate-up" style="background: var(--surface); padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; border: 1px solid var(--border);">
-            <i class="ph ph-image-square" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
-            <h2 style="margin-bottom: 10px; color: var(--text-main);">Upload Profile Photo</h2>
-            <p style="color: var(--text-muted); margin-bottom: 30px;">Choose a clear photo of yourself. Max size 5MB.</p>
-            
-            <input type="file" id="photo-input" accept="image/*" style="display: none;">
-            
-            <label for="photo-input" style="display: block; background: var(--bg-main); border: 2px dashed var(--border); padding: 30px; border-radius: 12px; cursor: pointer; margin-bottom: 20px; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--primary)'; this.style.background='rgba(183, 110, 48, 0.05)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)'">
-                <i class="ph ph-cloud-arrow-up" style="font-size: 2rem; color: var(--primary);"></i>
-                <span style="display: block; margin-top: 10px; font-weight: 600; color: var(--text-main);">Click to select photo</span>
-            </label>
-            
-            <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()" style="width: 100%;">Cancel</button>
-        </div>
-    `;
-    
-    document.body.appendChild(overlay);
-    
-    const input = overlay.querySelector('#photo-input');
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('photo', file);
-        formData.append('userId', window.currentUser.id);
-
-        try {
-            const container = overlay.querySelector('.glass-card');
-            container.innerHTML = `
-                <div style="padding: 40px;">
-                    <i class="ph ph-spinner animate-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
-                    <h2 style="color: var(--text-main);">Uploading to Cloudinary...</h2>
-                    <p style="color: var(--text-muted);">Processing your beautiful photo</p>
-                </div>
-            `;
-            
-            const response = await fetch(`${API_URL}/upload-photo`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (result.error) {
-                let msg = result.error;
-                if (result.details) msg += ": " + result.details;
-                throw new Error(msg);
-            }
-            
-            if (result.success) {
-                window.currentUser.photo_url = result.photo_url;
-                localStorage.setItem('wude_user', JSON.stringify(window.currentUser));
-                overlay.remove();
-                alert("✨ Photo updated successfully!");
-                showMyProfile();
-            }
-        } catch (err) {
-            console.error("Upload error:", err);
-            alert("Upload failed: " + err.message);
-            overlay.remove();
-        }
-
-// --- PHOTO UPLOAD MARKER ---
-window.updateUploadLabel = function(input) {
-    const labelText = document.getElementById('upload-label-text');
-    const submitBtn = document.getElementById('photo-submit-btn');
-    if (input.files && input.files[0]) {
-        labelText.textContent = "Selected: " + input.files[0].name;
-        labelText.style.color = "var(--primary)";
-        submitBtn.style.display = "block";
-    }
+    });
 };
-
-window.handlePhotoUpload = async function(e) {
-    e.preventDefault();
-    const fileInput = document.getElementById('photo-file-input');
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('photo', file);
-    formData.append('userId', window.currentUser.id);
-
-    try {
-        const submitBtn = document.getElementById('photo-submit-btn');
-        submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Uploading to Cloudinary...';
-        submitBtn.disabled = true;
-
-        const response = await fetch(`${API_URL}/upload-photo`, {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
-
-        if (result.success) {
-            window.currentUser.photo_url = result.photo_url;
-            localStorage.setItem('wude_user', JSON.stringify(window.currentUser));
-            alert("✨ Photo uploaded successfully!");
-            showMyProfile(); // Refresh to show the new photo
-        } else {
-            throw new Error(result.error);
-        }
-    } catch (err) {
-        alert("Upload failed: " + err.message);
-        showMyProfile();
-    }
-};
-
-
 
 window.openProfileModal = async function(id) {
     const modal = document.getElementById('profile-modal');
