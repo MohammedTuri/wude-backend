@@ -362,6 +362,32 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     #bio-data-card { position: absolute; left: 0; top: 0; width: 100%; }
 }
 
+
+/* Profile Modal Classes */
+.modal-profile-header {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.modal-profile-img {
+    width: 200px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.modal-profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
 /* Mobile Responsive Fixes */
 @media (max-width: 768px) {
     #top-nav {
@@ -461,5 +487,31 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
 
     .action-buttons .btn {
         width: 100% !important;
+    }
+
+    /* Modal Fixes for Mobile */
+    .modal-profile-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 20px !important;
+    }
+    
+    .modal-profile-img {
+        width: 100% !important;
+        height: 300px !important;
+    }
+    
+    .modal-profile-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
     }
 }
