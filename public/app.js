@@ -1087,7 +1087,14 @@ window.showPhotoManager = function() {
                 method: 'POST',
                 body: formData
             });
+            
             const result = await response.json();
+            
+            if (result.error) {
+                let msg = result.error;
+                if (result.details) msg += ": " + result.details;
+                throw new Error(msg);
+            }
             
             if (result.success) {
                 window.currentUser.photo_url = result.photo_url;
@@ -1095,10 +1102,9 @@ window.showPhotoManager = function() {
                 overlay.remove();
                 alert("✨ Photo updated successfully!");
                 showMyProfile();
-            } else {
-                throw new Error(result.error);
             }
         } catch (err) {
+            console.error("Upload error:", err);
             alert("Upload failed: " + err.message);
             overlay.remove();
         }
