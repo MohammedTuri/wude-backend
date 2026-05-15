@@ -44,6 +44,19 @@ const pool = new Pool({
   ssl: (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')) ? false : { rejectUnauthorized: false }
 });
 
+// Auto-init DB
+const initDb = async () => {
+    try {
+        const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+        await pool.query(schema);
+        console.log('Database Ready');
+    } catch (err) {
+        console.error('Database Init Failed:', err.message);
+    }
+};
+initDb();
+
+app.get('/api/health', (req, res) => res.json({ status: 'OK' }));
 
 // --- API ---
 
