@@ -264,66 +264,66 @@
 
 <!-- Chat View Section -->
 <section id="chat-view" style="display: none; padding-top: 80px; padding-bottom: 120px; min-height: 100vh; background: #f8f9fa;">
-<div class="container" style="max-width: 1400px; display: flex; gap: 30px;">
+    <div class="container" style="max-width: 1400px; display: flex; gap: 30px;">
+        
+        <!-- Middle: Conversations List -->
+        <main id="conversations-main" style="flex: 2; background: white; border-radius: 20px; box-shadow: var(--shadow); overflow: hidden;">
+            <div style="padding: 20px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0; color: var(--deep-charcoal); font-family: 'Playfair Display', serif;">Messages</h3>
+            </div>
+            
+            <div style="padding: 20px;">
+                <div id="conversations-list">
+                    <!-- Conversations loaded dynamically -->
+                </div>
+            </div>
+        </main>
+        
+        <!-- Right Sidebar: User Stats (Desktop only) -->
+        <aside class="desktop-only" id="chat-right-sidebar" style="width: 320px; display: flex; flex-direction: column; gap: 20px;">
+            <div id="user-stats-panel">
+                <div class="glass-card" style="padding: 25px; background: var(--primary); color: white; border-radius: 12px; border: none; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <img id="chat-user-img" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid white;">
+                        <div>
+                            <div id="chat-user-name" style="font-weight: 700; font-size: 1.2rem;"></div>
+                            <div id="chat-user-id" style="font-size: 0.8rem; opacity: 0.8;"></div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-bottom: 20px;">Free Membership</div>
+                    <button class="btn" style="width: 100%; background: white; color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700;">Upgrade to Premium</button>
+                </div>
+                
+                <div class="glass-card" style="padding: 20px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: 15px; color: #444;">Notifications</h4>
+                    <div id="chat-notifications" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="font-size: 0.9rem; color: #666;">No new notifications.</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-<!-- Middle: Conversations List -->
-<main style="flex: 2; background: white; border-radius: 20px; box-shadow: var(--shadow); overflow: hidden;">
-<div style="padding: 20px; border-bottom: 1px solid #eee;">
-<h3 style="margin: 0; color: var(--deep-charcoal); font-family: 'Playfair Display', serif;">Messages</h3>
-</div>
+        <!-- Active Chat Panel (Shown when a conversation is opened) -->
+        <div id="active-chat-panel" class="glass-card" style="display: none; flex: 3; height: calc(100vh - 150px); min-height: 400px; flex-direction: column; padding: 20px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img id="active-chat-img" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    <h3 id="active-chat-name" style="margin: 0; font-size: 1.1rem; color: var(--text-main);"></h3>
+                </div>
+                <span style="cursor: pointer; font-size: 1.5rem; color: var(--text-muted);" onclick="closeChatPanel()">&times;</span>
+            </div>
+            
+            <div id="active-chat-messages" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-right: 5px;">
+                <!-- Messages will load here -->
+            </div>
+            
+            <form onsubmit="handleSendMessage(event)" style="display: flex; gap: 10px;">
+                <input type="text" id="active-chat-input" placeholder="Type a message..." required style="flex-grow: 1; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); outline: none; background: var(--bg-main); color: var(--text-main);">
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px;"><i class="ph ph-paper-plane-right"></i></button>
+            </form>
+        </div>
 
-<div style="padding: 20px;">
-<div id="conversations-list">
-<!-- Conversations loaded dynamically -->
-</div>
-</div>
-</main>
-
-<!-- Right Sidebar: User Stats & Notifications or Active Chat -->
-<aside class="desktop-only" id="chat-right-sidebar" style="width: 320px; display: flex; flex-direction: column; gap: 20px;">
-<div id="user-stats-panel">
-<div class="glass-card" style="padding: 25px; background: var(--primary); color: white; border-radius: 12px; border: none; margin-bottom: 20px;">
-<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-<img id="chat-user-img" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid white;">
-<div>
-<div id="chat-user-name" style="font-weight: 700; font-size: 1.2rem;"></div>
-<div id="chat-user-id" style="font-size: 0.8rem; opacity: 0.8;"></div>
-</div>
-</div>
-<div style="font-size: 0.9rem; margin-bottom: 20px;">Free Membership</div>
-<button class="btn" style="width: 100%; background: white; color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700;">Upgrade to Premium</button>
-</div>
-
-<div class="glass-card" style="padding: 20px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
-<h4 style="margin-bottom: 15px; color: #444;">Notifications</h4>
-<div id="chat-notifications" style="display: flex; flex-direction: column; gap: 15px;">
-<!-- Mock notifications -->
-<div style="font-size: 0.9rem; color: #666;">No new notifications.</div>
-</div>
-</div>
-</div>
-
-<!-- Active Chat Panel (Hidden by default) -->
-<div id="active-chat-panel" class="glass-card" style="display: none; height: calc(100vh - 150px); min-height: 400px; flex-direction: column; padding: 20px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
-<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
-<div style="display: flex; align-items: center; gap: 10px;">
-<img id="active-chat-img" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-<h3 id="active-chat-name" style="margin: 0; font-size: 1.1rem; color: var(--text-main);"></h3>
-</div>
-<span style="cursor: pointer; font-size: 1.5rem; color: var(--text-muted);" onclick="closeChatPanel()">&times;</span>
-</div>
-
-<div id="active-chat-messages" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding-right: 5px;">
-<!-- Messages will load here -->
-</div>
-
-<form onsubmit="handleSendMessage(event)" style="display: flex; gap: 10px;">
-<input type="text" id="active-chat-input" placeholder="Type a message..." required style="flex-grow: 1; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); outline: none; background: var(--bg-main); color: var(--text-main);">
-<button type="submit" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px;"><i class="ph ph-paper-plane-right"></i></button>
-</form>
-</div>
-</aside>
-</div>
+    </div>
 </section>
 
 <!-- Discovery View Section -->

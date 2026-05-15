@@ -438,30 +438,42 @@ window.lastMessageCount = 0;
 
 window.openChatPanel = function(matchId, matchName, matchPhoto) {
     window.currentChatMatchId = matchId;
-    window.lastMessageCount = 0; // Reset for new chat
-    
-    document.getElementById('user-stats-panel').style.display = 'none';
-    document.getElementById('active-chat-panel').style.display = 'flex';
-    
-    document.getElementById('active-chat-img').src = matchPhoto;
+    window.lastMessageCount = 0;
+
+    const statsPanel = document.getElementById('user-stats-panel');
+    const chatPanel = document.getElementById('active-chat-panel');
+    const convMain = document.getElementById('conversations-main');
+
+    if (statsPanel) statsPanel.style.display = 'none';
+    if (chatPanel) chatPanel.style.display = 'flex';
+
+    if (window.innerWidth <= 768 && convMain) {
+        convMain.style.display = 'none';
+    }
+
+    document.getElementById('active-chat-img').src = matchPhoto || DEFAULT_PHOTO;
     document.getElementById('active-chat-name').innerText = matchName;
-    document.getElementById('active-chat-messages').innerHTML = '<div style="text-align: center; color: #999; margin-top: 20px;">Loading...</div>';
-    
+    document.getElementById('active-chat-messages').innerHTML = '<div style="text-align: center; color: #999; margin-top: 20px;">Loading messages...</div>';
+
     loadMessages();
-    
-    // Start polling for new messages every 3 seconds
     if (window.chatPollInterval) clearInterval(window.chatPollInterval);
     window.chatPollInterval = setInterval(loadMessages, 3000);
 }
 
 window.closeChatPanel = function() {
-    if (window.chatPollInterval) {
-        clearInterval(window.chatPollInterval);
-        window.chatPollInterval = null;
-    }
+    if (window.chatPollInterval) clearInterval(window.chatPollInterval);
     window.currentChatMatchId = null;
-    document.getElementById('user-stats-panel').style.display = 'block';
-    document.getElementById('active-chat-panel').style.display = 'none';
+
+    const statsPanel = document.getElementById('user-stats-panel');
+    const chatPanel = document.getElementById('active-chat-panel');
+    const convMain = document.getElementById('conversations-main');
+
+    if (statsPanel) statsPanel.style.display = 'block';
+    if (chatPanel) chatPanel.style.display = 'none';
+
+    if (window.innerWidth <= 768 && convMain) {
+        convMain.style.display = 'block';
+    }
 }
 
 async function loadMessages() {

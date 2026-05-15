@@ -504,8 +504,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     
     .modal-profile-grid {
         grid-template-columns: 1fr !important;
-    }
-
+    
     .modal-content {
         width: 100% !important;
         max-width: 100% !important;
@@ -514,6 +513,15 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         border-radius: 0 !important;
         margin: 0 !important;
         overflow-y: auto !important;
-        padding-bottom: 100px !important; /* Space for buttons at the bottom */
+        padding-bottom: 100px !important;
+    }
+
+    #active-chat-panel {
+        width: 100% !important;
+        height: calc(100vh - 130px) !important;
+        border-radius: 0 !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 15px !important;
     }
 }
