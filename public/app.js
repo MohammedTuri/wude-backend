@@ -890,7 +890,7 @@ window.openProfileModal = async function(id) {
     const modal = document.getElementById('profile-modal');
     const modalBody = document.getElementById('modal-body');
     modal.style.display = 'flex';
-    modalBody.innerHTML = '<div style="padding: 40px; text-align: center;">Loading...</div>';
+    modalBody.innerHTML = '<div style="padding: 40px; text-align: center;"><i class="ph ph-spinner animate-spin" style="font-size: 2rem;"></i><br>Loading...</div>';
 
     try {
         const response = await fetch(`${API_URL}/profiles/${id}`);
@@ -903,37 +903,40 @@ window.openProfileModal = async function(id) {
 
         modalBody.innerHTML = `
             <div class="modal-profile-header">
-                <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src='${DEFAULT_PHOTO}';" class="modal-profile-img">
-                <div style="flex: 1;">
-                    <h2 style="font-size: 2rem; margin-bottom: 5px; color: var(--text-main); text-align: left;">${user.full_name}, ${user.age}</h2>
-                    <p style="color: var(--primary); font-weight: 600; font-size: 1.1rem; margin-bottom: 15px; text-align: left;"><i class="ph ph-map-pin"></i> ${user.location}</p>
+                <div style="width: 100%; border-radius: 12px; overflow: hidden; height: 350px; background: #f0f0f0;">
+                    <img src="${user.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src='${DEFAULT_PHOTO}';" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="flex: 1; padding: 10px 0;">
+                    <h2 style="font-size: 2.2rem; margin-bottom: 5px; color: var(--text-main); text-align: left;">${user.full_name}, ${user.age}</h2>
+                    <p style="color: var(--primary); font-weight: 600; font-size: 1.1rem; margin-bottom: 20px; text-align: left;"><i class="ph ph-map-pin"></i> ${user.location}</p>
                     
                     <div class="modal-profile-grid">
-                        <div><strong style="color: var(--text-muted);">Profession:</strong> ${user.profession || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Education:</strong> ${user.education || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Religion:</strong> ${user.religion_practice || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Timeline:</strong> ${user.marriage_timeline || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Height:</strong> ${user.height || 'Not specified'}</div>
-                        <div><strong style="color: var(--text-muted);">Children:</strong> ${user.children_plans || 'Not specified'}</div>
+                        <div style="background: var(--bg-main); padding: 10px; border-radius: 8px;"><strong style="color: var(--text-muted); display: block; font-size: 0.8rem; text-transform: uppercase;">Profession</strong> ${user.profession || 'Not specified'}</div>
+                        <div style="background: var(--bg-main); padding: 10px; border-radius: 8px;"><strong style="color: var(--text-muted); display: block; font-size: 0.8rem; text-transform: uppercase;">Education</strong> ${user.education || 'Not specified'}</div>
+                        <div style="background: var(--bg-main); padding: 10px; border-radius: 8px;"><strong style="color: var(--text-muted); display: block; font-size: 0.8rem; text-transform: uppercase;">Religion</strong> ${user.religion_practice || 'Not specified'}</div>
+                        <div style="background: var(--bg-main); padding: 10px; border-radius: 8px;"><strong style="color: var(--text-muted); display: block; font-size: 0.8rem; text-transform: uppercase;">Timeline</strong> ${user.marriage_timeline || 'Not specified'}</div>
+                        <div style="background: var(--bg-main); padding: 10px; border-radius: 8px;"><strong style="color: var(--text-muted); display: block; font-size: 0.8rem; text-transform: uppercase;">Height</strong> ${user.height || 'Not specified'}</div>
+                        <div style="background: var(--bg-main); padding: 10px; border-radius: 8px;"><strong style="color: var(--text-muted); display: block; font-size: 0.8rem; text-transform: uppercase;">Children</strong> ${user.children_plans || 'Not specified'}</div>
                     </div>
                 </div>
             </div>
             
-            <div style="background: var(--bg-main); border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: left;">
-                <h3 style="margin-bottom: 10px; color: var(--primary); font-size: 1.2rem;">About Me</h3>
-                <p style="color: var(--text-main); line-height: 1.6;">${user.bio || 'No bio provided.'}</p>
+            <div style="background: #fff; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 30px; text-align: left; box-shadow: var(--shadow-sm);">
+                <h3 style="margin-bottom: 12px; color: var(--primary); font-size: 1.2rem; font-family: 'Playfair Display', serif;">About Me</h3>
+                <p style="color: var(--text-main); line-height: 1.7; font-size: 1.05rem;">${user.bio || 'No bio provided.'}</p>
             </div>
 
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="likeUser(${user.id})" style="flex: 2; padding: 15px; font-size: 1rem; min-width: 130px;"><i class="ph ph-heart"></i> Like & Connect</button>
-                <button class="btn btn-primary" onclick="startDirectChatFromModal(${user.id}, '${(user.full_name || '').replace(/'/g,"\\'")}', '${(user.photo_url || '').replace(/'/g,"\\'")}')" style="flex: 1.5; padding: 15px; font-size: 1rem; background: #059669; border-color: #059669; min-width: 100px;"><i class="ph ph-chat-circle"></i> Chat</button>
-                <button class="btn" onclick="rejectLike(${user.id})" style="flex: 1; padding: 15px; min-width: 80px; background: var(--danger); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Pass</button>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; position: sticky; bottom: -20px; background: white; padding: 20px; border-top: 1px solid var(--border); margin: 0 -20px -20px -20px;">
+                <button class="btn btn-primary" onclick="likeUser(${user.id})" style="flex: 2; padding: 16px; font-size: 1.1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-heart-fill" style="font-size: 1.4rem;"></i> Like & Connect</button>
+                <button class="btn btn-primary" onclick="startDirectChatFromModal(${user.id}, '${(user.full_name || '').replace(/'/g,'\\\\\'')}', '${(user.photo_url || '').replace(/'/g,'\\\\\'')}')" style="flex: 1.5; padding: 16px; font-size: 1.1rem; background: #059669; border-color: #059669; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-chat-circle-fill" style="font-size: 1.4rem;"></i> Chat</button>
+                <button class="btn" onclick="rejectLike(${user.id})" style="flex: 1; padding: 16px; background: #fee2e2; color: #dc2626; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class="ph ph-x-bold"></i></button>
             </div>
         `;
     } catch (err) {
         modalBody.innerHTML = '<div style="padding: 40px; text-align: center;">Failed to load profile details.</div>';
     }
 }
+
 
 window.likeUser = async function(receiverId) {
     if (!window.currentUser) {

@@ -492,8 +492,8 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     /* Modal Fixes for Mobile */
     .modal-profile-header {
         flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
+        align-items: stretch !important;
+        text-align: left !important;
         gap: 20px !important;
     }
     
@@ -513,5 +513,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         max-height: 100vh !important;
         border-radius: 0 !important;
         margin: 0 !important;
+        overflow-y: auto !important;
+        padding-bottom: 100px !important; /* Space for buttons at the bottom */
     }
 }
