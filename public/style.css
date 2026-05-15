@@ -407,4 +407,33 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         padding: 20px !important;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
     }
+
+    /* Profile Modal Mobile Fixes */
+    .advanced-card {
+        max-height: 95vh !important;
+        width: 100% !important;
+        border-radius: 0 !important;
+    }
+
+    .profile-hero {
+        height: 250px !important;
+    }
+
+    .hero-name {
+        font-size: 1.8rem !important;
+    }
+
+    .profile-content-scrollable {
+        padding: 20px !important;
+    }
+
+    .action-buttons {
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 15px !important;
+    }
+
+    .action-buttons .btn {
+        width: 100% !important;
+    }
 }

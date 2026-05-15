@@ -268,20 +268,11 @@
 
             <!-- Middle: Conversations List -->
             <main style="flex: 2; background: white; border-radius: 20px; box-shadow: var(--shadow); overflow: hidden;">
-                <div class="chat-tabs" style="display: flex; border-bottom: 1px solid #eee;">
-                    <button class="chat-tab active">All</button>
-                    <button class="chat-tab">Chats</button>
-                    <button class="chat-tab">Requests</button>
-                    <button class="chat-tab">Calls</button>
+                <div style="padding: 20px; border-bottom: 1px solid #eee;">
+                    <h3 style="margin: 0; color: var(--deep-charcoal); font-family: 'Playfair Display', serif;">Messages</h3>
                 </div>
 
                 <div style="padding: 20px;">
-                    <h4 style="margin-bottom: 15px; color: #444;">Online Now</h4>
-                    <div id="online-now-list" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px;">
-                        <!-- Online users mock -->
-                    </div>
-
-                    <h4 style="margin-bottom: 15px; color: #444;">Messages</h4>
                     <div id="conversations-list">
                         <!-- Conversations loaded dynamically -->
                     </div>
@@ -295,7 +286,7 @@
                         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                             <img id="chat-user-img" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid white;">
                             <div>
-                                <div id="chat-user-name-display" style="font-weight: 700; font-size: 1.2rem;"></div>
+                                <div id="chat-user-name" style="font-weight: 700; font-size: 1.2rem;"></div>
                                 <div id="chat-user-id" style="font-size: 0.8rem; opacity: 0.8;"></div>
                             </div>
                         </div>
