@@ -47,9 +47,13 @@ const upload = multer({ storage: storage });
 const connectionString = process.env.DATABASE_URL || '';
 const pool = new Pool({
   connectionString: connectionString,
-  ssl: connectionString.includes('localhost') || connectionString.includes('127.0.0.1') || connectionString === ''
+  ssl: (connectionString.includes('localhost') || connectionString.includes('127.0.0.1') || connectionString === '')
     ? false 
     : { rejectUnauthorized: false }
+});
+
+pool.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
 });
 
 // Auto-initialize Schema
@@ -65,7 +69,15 @@ const initDb = async () => {
 };
 initDb();
 
-// --- API ROUTES ---
+// Health Check
+app.get('/api/health', async (req, res) => {
+    try {
+        await pool.query('SELECT 1');
+        res.json({ status: 'OK', database: 'Connected', timestamp: new Date() });
+    } catch (err) {
+        res.status(500).json({ status: 'ERROR', database: err.message });
+    }
+});
 
 // 1. Get Profiles (The Discovery Feed)
 app.get('/api/profiles', async (req, res) => {
