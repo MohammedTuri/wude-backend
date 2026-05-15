@@ -293,7 +293,7 @@ async function loadProfiles() {
                     <div style="position: relative; overflow: hidden; height: 350px;">
                         <img src="${profile.photo_url || DEFAULT_PHOTO}" onerror="this.onerror=null; this.src=DEFAULT_PHOTO;" class="profile-img" style="height: 100%;">
                     </div>
-                    <div class="profile-inf✨ style="padding: 15px;">
+                    <div class="profile-info" style="padding: 15px;">
                         <div class="profile-name" style="font-size: 1.3rem;">${profile.full_name}, ${profile.age}</div>
                         <div class="profile-meta">${profile.location}</div>
                     </div>
@@ -909,7 +909,7 @@ window.openProfileModal = async function(id) {
         const response = await fetch(`${API_URL}/profiles/${id}`);
         const user = await response.json();
         
-        if (!user || user.error) {
+        if (!user || user.error || Object.keys(user).length === 0) {
             modalBody.innerHTML = `<div style="padding: 40px; text-align: center;">${user ? user.error : 'User not found'}</div>`;
             return;
         }
