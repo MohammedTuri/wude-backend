@@ -23,15 +23,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve frontend from this folder
 
 // Cloudinary Config Diagnostics
-console.log('--- Environment Variable Check ---');
-console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'PRESENT' : 'MISSING');
-console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'PRESENT' : 'MISSING');
-console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'PRESENT' : 'MISSING');
-console.log('---------------------------------');
-
-if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-    console.warn("CRITICAL WARNING: Cloudinary environment variables are missing. Photo uploads will definitely fail.");
-}
+console.log('--- Startup Cloudinary Check ---');
+console.log('CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'OK' : 'MISSING');
+console.log('API_KEY:', process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING');
+console.log('API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -39,6 +34,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true
 });
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -75,7 +71,18 @@ const initDb = async () => {
 };
 initDb();
 
-// Health Check
+// Debug & Health Routes
+app.get('/api/debug-env', (req, res) => {
+    res.json({
+        CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'OK' : 'MISSING',
+        CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING',
+        CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING',
+        DATABASE_URL: process.env.DATABASE_URL ? 'OK' : 'MISSING',
+        NODE_ENV: process.env.NODE_ENV,
+        timestamp: new Date()
+    });
+});
+
 app.get('/api/health', async (req, res) => {
     try {
         await pool.query('SELECT 1');
@@ -84,6 +91,8 @@ app.get('/api/health', async (req, res) => {
         res.status(500).json({ status: 'ERROR', database: err.message });
     }
 });
+
+// --- API ROUTES ---
 
 // 1. Get Profiles (The Discovery Feed)
 app.get('/api/profiles', async (req, res) => {
@@ -176,70 +185,22 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Upload User Photo
-app.post('/api/users/:id/photo', upload.single('photo'), async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (!req.file) {
-            return res.status(400).json({ error: 'Profile picture is absolutely required.' });
-        }
-        
-        const photo_url = `/uploads/${req.file.filename}`;
-        
-        const result = await pool.query(
-            'UPDATE wude_users SET photo_url = $1 WHERE id = $2 RETURNING photo_url',
-            [photo_url, id]
-        );
-        
-        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
-        
-        res.json({ success: true, photo_url: result.rows[0].photo_url });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 // User Login
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(`Login attempt for: ${email}`);
-        
-        if (!email || !password) {
-            console.warn('Login attempt with missing credentials');
-            return res.status(400).json({ error: 'Email and password are required' });
-        }
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
         const result = await pool.query(
             'SELECT * FROM wude_users WHERE email = $1 AND password_hash = $2',
             [email, password]
         );
         
-        if (result.rows.length === 0) {
-            console.log(`Login failed for: ${email}`);
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
+        if (result.rows.length === 0) return res.status(401).json({ error: 'Invalid email or password' });
         
-        console.log(`Login successful for: ${email}`);
         const user = result.rows[0];
-        delete user.password_hash; // Don't send the password back!
+        delete user.password_hash;
         res.json(user);
-    } catch (err) {
-        console.error('Login database error:', err.message);
-        res.status(500).json({ error: 'Internal Server Error: ' + err.message });
-    }
-});
-
-// Password Reset
-app.post('/api/reset-password', async (req, res) => {
-    try {
-        const { email, newPassword } = req.body;
-        const result = await pool.query(
-            'UPDATE wude_users SET password_hash = $1 WHERE email = $2 RETURNING id',
-            [newPassword, email]
-        );
-        if (result.rows.length === 0) return res.status(404).json({ error: 'Email not found' });
-        res.json({ success: true, message: 'Password reset successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -248,8 +209,6 @@ app.post('/api/reset-password', async (req, res) => {
 // Update Profile
 app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
-    console.log(`Update request received for user ID: ${id}`);
-    
     const {
         full_name, location, age, profession, education,
         marital_status, religion_practice, marriage_timeline,
@@ -263,276 +222,73 @@ app.put('/api/users/:id', async (req, res) => {
                  education = $5, marital_status = $6, religion_practice = $7, 
                  marriage_timeline = $8, children_plans = $9, bio = $10, income = $11
              WHERE id = $12 RETURNING *`,
-            [
-                full_name || null, 
-                location || null, 
-                parseInt(age) || null, 
-                profession || null, 
-                education || null, 
-                marital_status || null, 
-                religion_practice || null, 
-                marriage_timeline || null, 
-                children_plans || null, 
-                bio || null, 
-                income || null, 
-                id
-            ]
+            [full_name, location, parseInt(age), profession, education, marital_status, religion_practice, marriage_timeline, children_plans, bio, income, id]
         );
         
-        if (result.rows.length === 0) {
-            console.warn(`Update failed: User ${id} not found.`);
-            return res.status(404).json({ error: 'User not found' });
-        }
-        
-        console.log(`Successfully updated profile for user ${id}`);
-        const updatedUser = result.rows[0];
-        delete updatedUser.password;
-        res.json(updatedUser);
-    } catch (err) {
-        console.error(`Database error during update for user ${id}:`, err.message);
-        res.status(500).json({ error: 'Failed to update profile: ' + err.message });
-    }
-});
-
-// 2. Like a User (The Matching Engine)
-app.post('/api/like', async (req, res) => {
-    const { senderId, receiverId } = req.body;
-    try {
-        // Record the like
-        await pool.query(
-            'INSERT INTO wude_likes (sender_id, receiver_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-            [senderId, receiverId]
-        );
-
-        // Also record as an interest (Zawaj style)
-        await pool.query(
-            'INSERT INTO wude_interests (sender_id, receiver_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-            [senderId, receiverId]
-        );
-
-        // Check if it's a match! (Did the other person already like us?)
-        const checkMatch = await pool.query(
-            'SELECT * FROM wude_likes WHERE sender_id = $1 AND receiver_id = $2',
-            [receiverId, senderId]
-        );
-
-        if (checkMatch.rows.length > 0) {
-            // IT IS A MATCH!
-            await pool.query(
-                'INSERT INTO wude_matches (user_one, user_two) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-                [Math.min(senderId, receiverId), Math.max(senderId, receiverId)]
-            );
-            return res.json({ status: 'MATCHED', message: 'You have a new match!' });
-        }
-
-        res.json({ status: 'LIKED', message: 'Interest expressed successfully' });
-    } catch (err) {
-        res.status(500).json({ error: 'Action failed' });
-    }
-});
-
-// Reject/Delete a Like
-app.delete('/api/like', async (req, res) => {
-    const { senderId, receiverId } = req.body;
-    try {
-        await pool.query('DELETE FROM wude_likes WHERE sender_id = $1 AND receiver_id = $2', [senderId, receiverId]);
-        res.json({ success: true, message: 'Like rejected' });
-    } catch (err) {
-        res.status(500).json({ error: 'Action failed' });
-    }
-});
-
-// Get likes by type
-app.get('/api/likes/:userId', async (req, res) => {
-    const { userId } = req.params;
-    const { type } = req.query; // received, sent, mutual
-    try {
-        let query;
-        if (type === 'received') {
-            query = `
-                SELECT u.id, u.full_name, u.age, u.location, u.photo_url 
-                FROM wude_users u
-                JOIN wude_likes l ON u.id = l.sender_id
-                WHERE l.receiver_id = $1
-            `;
-        } else if (type === 'sent') {
-            query = `
-                SELECT u.id, u.full_name, u.age, u.location, u.photo_url 
-                FROM wude_users u
-                JOIN wude_likes l ON u.id = l.receiver_id
-                WHERE l.sender_id = $1
-            `;
-        } else { // mutual
-            query = `
-                SELECT u.id, u.full_name, u.age, u.location, u.photo_url 
-                FROM wude_users u
-                WHERE u.id IN (
-                    SELECT user_two FROM wude_matches WHERE user_one = $1
-                    UNION
-                    SELECT user_one FROM wude_matches WHERE user_two = $1
-                )
-            `;
-        }
-        const result = await pool.query(query, [userId]);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch likes' });
-    }
-});
-
-// Get received interests count
-app.get('/api/interests/count/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const result = await pool.query(
-            'SELECT COUNT(*) FROM wude_interests WHERE receiver_id = $1 AND status = \'pending\'',
-            [userId]
-        );
-        res.json({ count: parseInt(result.rows[0].count) });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Toggle Photo Privacy
-app.post('/api/users/:id/photo-privacy', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { isPrivate } = req.body;
-        await pool.query(
-            'UPDATE wude_users SET photo_private = $1 WHERE id = $2',
-            [isPrivate, id]
-        );
-        res.json({ success: true, isPrivate });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get Conversations (Matches)
-app.get('/api/conversations/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const result = await pool.query(`
-            SELECT m.id as match_id, 
-                   u.id as user_id, u.full_name, u.age, u.location, u.photo_url, u.marital_status, u.height,
-                   (SELECT content FROM wude_messages WHERE match_id = m.id ORDER BY created_at DESC LIMIT 1) as last_message,
-                   (SELECT created_at FROM wude_messages WHERE match_id = m.id ORDER BY created_at DESC LIMIT 1) as last_message_time
-            FROM wude_matches m
-            JOIN wude_users u ON (m.user_one = u.id OR m.user_two = u.id)
-            WHERE (m.user_one = $1 OR m.user_two = $1) AND u.id != $1
-            ORDER BY last_message_time DESC NULLS LAST
-        `, [userId]);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get Messages for a Match
-app.get('/api/matches/:matchId/messages', async (req, res) => {
-    try {
-        const { matchId } = req.params;
-        const result = await pool.query('SELECT * FROM wude_messages WHERE match_id = $1 ORDER BY created_at ASC', [matchId]);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get Messages between two users
-app.get('/api/messages/:userOne/:userTwo', async (req, res) => {
-    try {
-        const { userOne, userTwo } = req.params;
-        const result = await pool.query(`
-            SELECT msg.* FROM wude_messages msg
-            JOIN wude_matches m ON msg.match_id = m.id
-            WHERE (m.user_one = $1 AND m.user_two = $2) 
-               OR (m.user_one = $2 AND m.user_two = $1)
-            ORDER BY msg.created_at ASC
-        `, [userOne, userTwo]);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Send a Message
-app.post('/api/messages', async (req, res) => {
-    try {
-        const { senderId, receiverId, content } = req.body;
-        
-        // Find the match_id
-        const matchQuery = await pool.query(
-            'SELECT id FROM wude_matches WHERE (user_one = $1 AND user_two = $2) OR (user_one = $2 AND user_two = $1)',
-            [senderId, receiverId]
-        );
-        
-        let matchId;
-        if (matchQuery.rows.length === 0) {
-            // PROMOTIONAL FEATURE: Auto-create match to allow open messaging
-            const newMatch = await pool.query(
-                'INSERT INTO wude_matches (user_one, user_two) VALUES ($1, $2) RETURNING id',
-                [senderId, receiverId]
-            );
-            matchId = newMatch.rows[0].id;
-        } else {
-            matchId = matchQuery.rows[0].id;
-        }
-        
-        const result = await pool.query(
-            'INSERT INTO wude_messages (match_id, sender_id, content) VALUES ($1, $2, $3) RETURNING *',
-            [matchId, senderId, content]
-        );
+        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Get Likes Sent
-app.get('/api/likes/sent/:userId', async (req, res) => {
+// Upload Photo (Middleware handles Cloudinary)
+app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
     try {
-        const { userId } = req.params;
-        const result = await pool.query(`
-            SELECT u.id, u.full_name, u.age, u.location, u.photo_url, u.photo_private 
-            FROM wude_likes l
-            JOIN wude_users u ON l.receiver_id = u.id
-            WHERE l.sender_id = $1
-        `, [userId]);
+        const { userId } = req.body;
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+        
+        const photoUrl = req.file.path; 
+        await pool.query('UPDATE wude_users SET photo_url = $1 WHERE id = $2', [photoUrl, userId]);
+        
+        res.json({ success: true, photo_url: photoUrl });
+    } catch (err) {
+        res.status(500).json({ error: 'Upload failed: ' + err.message });
+    }
+});
+
+// Like / Match System
+app.post('/api/like', async (req, res) => {
+    const { senderId, receiverId } = req.body;
+    try {
+        await pool.query('INSERT INTO wude_likes (sender_id, receiver_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [senderId, receiverId]);
+        const check = await pool.query('SELECT * FROM wude_likes WHERE sender_id = $1 AND receiver_id = $2', [receiverId, senderId]);
+        if (check.rows.length > 0) {
+            await pool.query('INSERT INTO wude_matches (user_one, user_two) VALUES ($1, $2) ON CONFLICT DO NOTHING', [Math.min(senderId, receiverId), Math.max(senderId, receiverId)]);
+            return res.json({ status: 'MATCHED' });
+        }
+        res.json({ status: 'LIKED' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/likes/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { type } = req.query;
+    try {
+        let query;
+        if (type === 'received') {
+            query = 'SELECT u.* FROM wude_users u JOIN wude_likes l ON u.id = l.sender_id WHERE l.receiver_id = $1';
+        } else if (type === 'sent') {
+            query = 'SELECT u.* FROM wude_users u JOIN wude_likes l ON u.id = l.receiver_id WHERE l.sender_id = $1';
+        } else {
+            query = 'SELECT u.* FROM wude_users u WHERE u.id IN (SELECT user_two FROM wude_matches WHERE user_one = $1 UNION SELECT user_one FROM wude_matches WHERE user_two = $1)';
+        }
+        const result = await pool.query(query, [userId]);
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Get Likes Received (excluding those already matched)
-app.get('/api/likes/received/:userId', async (req, res) => {
+// Messages
+app.get('/api/conversations/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
         const result = await pool.query(`
-            SELECT u.id, u.full_name, u.age, u.location, u.photo_url, u.photo_private 
-            FROM wude_likes l
-            JOIN wude_users u ON l.sender_id = u.id
-            WHERE l.receiver_id = $1
-            AND NOT EXISTS (
-                SELECT 1 FROM wude_matches 
-                WHERE (user_one = $1 AND user_two = u.id) 
-                   OR (user_one = u.id AND user_two = $1)
-            )
-        `, [userId]);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get Mutual Likes (Matches)
-app.get('/api/likes/mutual/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const result = await pool.query(`
-            SELECT u.id, u.full_name, u.age, u.location, u.photo_url, u.photo_private 
+            SELECT m.id as match_id, u.id as user_id, u.full_name, u.photo_url,
+                   (SELECT content FROM wude_messages WHERE match_id = m.id ORDER BY created_at DESC LIMIT 1) as last_message
             FROM wude_matches m
             JOIN wude_users u ON (m.user_one = u.id OR m.user_two = u.id)
             WHERE (m.user_one = $1 OR m.user_two = $1) AND u.id != $1
@@ -543,48 +299,32 @@ app.get('/api/likes/mutual/:userId', async (req, res) => {
     }
 });
 
-// Upload Photo to Cloudinary
-app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
+app.get('/api/matches/:matchId/messages', async (req, res) => {
     try {
-        const { userId } = req.body;
-        console.log(`Photo upload attempt for user ID: ${userId}`);
-        
-        if (!req.file) {
-            console.warn('Upload attempt with no file.');
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-        
-        const photoUrl = req.file.path; // Cloudinary URL
-        console.log(`File received. Cloudinary path: ${photoUrl}`);
-
-        const result = await pool.query(
-            'UPDATE wude_users SET photo_url = $1 WHERE id = $2 RETURNING id',
-            [photoUrl, userId]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        console.log(`Successfully updated photo URL in database for user ${userId}`);
-        res.json({ success: true, photo_url: photoUrl });
+        const result = await pool.query('SELECT * FROM wude_messages WHERE match_id = $1 ORDER BY created_at ASC', [req.params.matchId]);
+        res.json(result.rows);
     } catch (err) {
-        console.error('Photo upload/DB error:', err.message);
-        res.status(500).json({ error: 'Server error: ' + err.message });
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/messages', async (req, res) => {
+    try {
+        const { senderId, receiverId, content } = req.body;
+        const match = await pool.query('SELECT id FROM wude_matches WHERE (user_one = $1 AND user_two = $2) OR (user_one = $2 AND user_two = $1)', [senderId, receiverId]);
+        if (match.rows.length === 0) return res.status(403).json({ error: 'Not matched' });
+        const result = await pool.query('INSERT INTO wude_messages (match_id, sender_id, content) VALUES ($1, $2, $3) RETURNING *', [match.rows[0].id, senderId, content]);
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Unhandled Server Error:', err);
-    if (err instanceof multer.MulterError) {
-        return res.status(400).json({ error: 'Upload Error: ' + err.message });
-    }
-    res.status(500).json({ 
-        error: 'Critical Server Error', 
-        details: err.message,
-        path: req.path
-    });
+    console.error('SERVER ERROR:', err);
+    if (err instanceof multer.MulterError) return res.status(400).json({ error: 'Upload Error: ' + err.message });
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
 });
 
 app.listen(port, () => {
