@@ -44,20 +44,6 @@ const pool = new Pool({
   ssl: (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')) ? false : { rejectUnauthorized: false }
 });
 
-// Debug Route
-app.get('/api/debug-env', (req, res) => {
-    res.json({
-        SERVICE_NAME: process.env.RENDER_SERVICE_NAME || 'Unknown',
-        CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'OK' : 'MISSING',
-        CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? 'OK' : 'MISSING',
-        CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? 'OK' : 'MISSING',
-        DATABASE_URL: process.env.DATABASE_URL ? 'OK' : 'MISSING',
-        ALL_KEYS: Object.keys(process.env).sort(),
-        TIME: new Date().toISOString()
-    });
-});
-
-app.get('/api/health', (req, res) => res.json({ status: 'OK' }));
 
 // --- API ---
 
