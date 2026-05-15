@@ -22,17 +22,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve frontend from this folder
 
-// Cloudinary Config
+// Cloudinary Config Diagnostics
+console.log('--- Environment Variable Check ---');
+console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'PRESENT' : 'MISSING');
+console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'PRESENT' : 'MISSING');
+console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'PRESENT' : 'MISSING');
+console.log('---------------------------------');
+
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-    console.warn("WARNING: Cloudinary environment variables are missing. Photo uploads will fail.");
+    console.warn("CRITICAL WARNING: Cloudinary environment variables are missing. Photo uploads will definitely fail.");
 }
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
 });
-
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
