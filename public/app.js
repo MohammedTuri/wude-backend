@@ -898,7 +898,8 @@ window.editMyProfile = function() {
     });
 };
 
-window.openProfileModal = async function(id) {\n    document.body.style.overflow = 'hidden';
+window.openProfileModal = async function(id) {
+    document.body.style.overflow = 'hidden';
     const modal = document.getElementById('profile-modal');
     const modalBody = document.getElementById('modal-body');
     modal.style.display = 'flex';
@@ -995,7 +996,8 @@ window.likeUser = async function(receiverId) {
     }
 }
 
-window.closeModal = function() {\n    document.body.style.overflow = 'auto';
+window.closeModal = function() {
+    document.body.style.overflow = 'auto';
     const modal = document.getElementById('profile-modal');
     if (modal) modal.style.display = 'none';
 }
