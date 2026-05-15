@@ -209,13 +209,7 @@ window.showFeed = function() {
     loadProfiles();
 }
 
-window.showPhotoManager = function() {
-    hideAllSections();
-    document.getElementById('photo-manager-view').style.display = 'block';
-    const railPhoto = document.getElementById('rail-photo');
-    if (railPhoto) railPhoto.classList.add('active');
-    loadUserPhotos();
-}
+// showPhotoManager is handled by the modal version at the end of the file.
 
 async function loadUserPhotos() {
     const grid = document.getElementById('photo-gallery-grid');
@@ -908,8 +902,11 @@ window.editMyProfile = function() {
 
     document.body.appendChild(overlay);
 
-    overlay.querySelector('#full-edit-form').onsubmit = async (e) => {
+    const editForm = overlay.querySelector('#full-edit-form');
+    editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log("Profile Edit: Form submitted!");
+        
         const formData = new FormData(e.target);
         const updatedData = Object.fromEntries(formData.entries());
         
@@ -919,12 +916,20 @@ window.editMyProfile = function() {
             submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Saving Profile...';
             submitBtn.disabled = true;
 
+            const payload = { ...window.currentUser, ...updatedData };
+            // Ensure age is an integer
+            if (payload.age) payload.age = parseInt(payload.age);
+            
+            console.log("Sending update payload:", payload);
+
             const response = await fetch(`${API_URL}/users/${user.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...user, ...updatedData })
+                body: JSON.stringify(payload)
             });
+            
             const result = await response.json();
+            console.log("Update response received:", result);
             
             if (result.error) throw new Error(result.error);
             
@@ -934,12 +939,15 @@ window.editMyProfile = function() {
             alert("✨ Profile updated successfully!");
             showMyProfile();
         } catch (err) {
-            console.error("Update error:", err);
+            console.error("Update failed error:", err);
             alert("Update failed: " + err.message);
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
         }
-    };
+    });
 };
 
 window.openProfileModal = async function(id) {

@@ -215,6 +215,8 @@ app.post('/api/reset-password', async (req, res) => {
 // Update Profile
 app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
+    console.log(`Update request received for user ID: ${id}`);
+    
     const {
         full_name, location, age, profession, education,
         marital_status, religion_practice, marriage_timeline,
@@ -228,17 +230,34 @@ app.put('/api/users/:id', async (req, res) => {
                  education = $5, marital_status = $6, religion_practice = $7, 
                  marriage_timeline = $8, children_plans = $9, bio = $10, income = $11
              WHERE id = $12 RETURNING *`,
-            [full_name, location, age, profession, education, marital_status, religion_practice, marriage_timeline, children_plans, bio, income, id]
+            [
+                full_name || null, 
+                location || null, 
+                parseInt(age) || null, 
+                profession || null, 
+                education || null, 
+                marital_status || null, 
+                religion_practice || null, 
+                marriage_timeline || null, 
+                children_plans || null, 
+                bio || null, 
+                income || null, 
+                id
+            ]
         );
         
-        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        if (result.rows.length === 0) {
+            console.warn(`Update failed: User ${id} not found.`);
+            return res.status(404).json({ error: 'User not found' });
+        }
         
+        console.log(`Successfully updated profile for user ${id}`);
         const updatedUser = result.rows[0];
         delete updatedUser.password;
         res.json(updatedUser);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to update profile' });
+        console.error(`Database error during update for user ${id}:`, err.message);
+        res.status(500).json({ error: 'Failed to update profile: ' + err.message });
     }
 });
 
@@ -495,20 +514,30 @@ app.get('/api/likes/mutual/:userId', async (req, res) => {
 app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
     try {
         const { userId } = req.body;
+        console.log(`Photo upload attempt for user ID: ${userId}`);
+        
         if (!req.file) {
+            console.warn('Upload attempt with no file.');
             return res.status(400).json({ error: 'No file uploaded' });
         }
+        
         const photoUrl = req.file.path; // Cloudinary URL
+        console.log(`File received. Cloudinary path: ${photoUrl}`);
 
-        await pool.query(
-            'UPDATE wude_users SET photo_url = $1 WHERE id = $2',
+        const result = await pool.query(
+            'UPDATE wude_users SET photo_url = $1 WHERE id = $2 RETURNING id',
             [photoUrl, userId]
         );
 
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log(`Successfully updated photo URL in database for user ${userId}`);
         res.json({ success: true, photo_url: photoUrl });
     } catch (err) {
-        console.error('Upload failed:', err.message);
-        res.status(500).json({ error: 'Failed to upload photo' });
+        console.error('Photo upload/DB error:', err.message);
+        res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 
