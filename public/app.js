@@ -956,7 +956,7 @@ window.openProfileModal = async function(id) {
                 <p style="color: var(--text-main); line-height: 1.7; font-size: 1.05rem;">${user.bio || 'No bio provided.'}</p>
             </div>
 
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; position: sticky; bottom: -20px; background: white; padding: 20px; border-top: 1px solid var(--border); margin: 0 -20px -20px -20px; z-index: 10;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; background: white; padding: 25px 20px; border-top: 1px solid var(--border); margin: 20px -20px -20px -20px; z-index: 10;">
                 <button class="btn btn-primary" onclick="likeUser(${user.id})" style="flex: 2; padding: 16px; font-size: 1.1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-heart-fill" style="font-size: 1.4rem;"></i> Like & Connect</button>
                 <button class="btn btn-primary" onclick="startDirectChatFromModal(${user.id}, '${(user.full_name || '').replace(/'/g,'\\\\\'')}', '${(user.photo_url || '').replace(/'/g,'\\\\\'')}')" style="flex: 1.5; padding: 16px; font-size: 1.1rem; background: #059669; border-color: #059669; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="ph ph-chat-circle-fill" style="font-size: 1.4rem;"></i> Chat</button>
                 <button class="btn" onclick="rejectLike(${user.id})" style="flex: 1; padding: 16px; background: #fee2e2; color: #dc2626; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class="ph ph-x-bold"></i></button>

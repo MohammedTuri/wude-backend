@@ -504,6 +504,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     
     .modal-profile-grid {
         grid-template-columns: 1fr !important;
+    }
     
     .modal-content {
         width: 100% !important;
@@ -513,7 +514,8 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
         border-radius: 0 !important;
         margin: 0 !important;
         overflow-y: auto !important;
-        padding-bottom: 100px !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 120px !important;
     }
 
     #active-chat-panel {
