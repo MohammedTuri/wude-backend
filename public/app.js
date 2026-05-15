@@ -95,13 +95,16 @@ async function handleAuth(event, type) {
             };
         }
 
-        console.log("Sending payload:", payload);
+        console.log(`Sending ${type} payload:`, payload);
         const response = await fetch('/api/' + type, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+        
+        console.log(`${type} response status:`, response.status);
         const data = await response.json();
+        console.log(`${type} response data:`, data);
 
         if (data.error) {
             alert(data.error);

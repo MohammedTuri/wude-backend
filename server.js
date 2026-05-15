@@ -198,19 +198,29 @@ app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         console.log(`Login attempt for: ${email}`);
+        
+        if (!email || !password) {
+            console.warn('Login attempt with missing credentials');
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
         const result = await pool.query(
             'SELECT * FROM wude_users WHERE email = $1 AND password_hash = $2',
             [email, password]
         );
+        
         if (result.rows.length === 0) {
             console.log(`Login failed for: ${email}`);
             return res.status(401).json({ error: 'Invalid email or password' });
         }
+        
         console.log(`Login successful for: ${email}`);
-        res.json(result.rows[0]);
+        const user = result.rows[0];
+        delete user.password_hash; // Don't send the password back!
+        res.json(user);
     } catch (err) {
-        console.error('Login error:', err.message);
-        res.status(500).json({ error: err.message });
+        console.error('Login database error:', err.message);
+        res.status(500).json({ error: 'Internal Server Error: ' + err.message });
     }
 });
 
