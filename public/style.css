@@ -567,7 +567,6 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     height: 100vh !important;
     z-index: 9999 !important;
     background: rgba(0,0,0,0.8) !important;
-    display: flex !important;
     justify-content: center !important;
     align-items: flex-start !important;
     padding-top: 40px !important;
@@ -599,7 +598,6 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     background: rgba(17, 24, 39, 0.8) !important;
     backdrop-filter: blur(4px) !important;
     z-index: 2000 !important;
-    display: flex !important;
     justify-content: center !important;
     align-items: flex-start !important;
     padding: 40px 20px !important;

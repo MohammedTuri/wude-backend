@@ -998,7 +998,10 @@ window.likeUser = async function(receiverId) {
 window.closeModal = function() {
     document.body.style.overflow = 'auto';
     const modal = document.getElementById('profile-modal');
-    if (modal) {\n        modal.style.setProperty('display', 'none', 'important');\n        console.log('Modal closed');\n    }
+    if (modal) {
+        modal.style.setProperty('display', 'none', 'important');
+        console.log('Modal closed');
+    }
 }
 
 window.startDirectChatFromModal = function(userId, userName, userPhoto) {
