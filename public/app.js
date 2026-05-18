@@ -930,7 +930,7 @@ window.openProfileModal = async function(id) {
                     <h2 style="font-size: 2.2rem; margin-bottom: 5px; color: #111827; text-align: left;">${user.full_name}, ${user.age}</h2>
                     <p style="color: #b76e30; font-weight: 600; font-size: 1.1rem; margin-bottom: 25px; text-align: left;"><i class="ph ph-map-pin"></i> ${user.location || 'Unknown'}</p>
                     
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 30px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px;">
                         <div style="background: #f9fafb; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
                             <strong style="color: #6b7280; display: block; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 4px;">Profession</strong>
                             <span style="color: #111827; font-weight: 600;">${user.profession || 'Not specified'}</span>

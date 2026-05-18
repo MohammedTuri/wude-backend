@@ -558,38 +558,9 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     }
 }
 
-/* Final Modal Visibility Fixes */
-.modal-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 9999 !important;
-    background: rgba(0,0,0,0.8) !important;
-    justify-content: center !important;
-    align-items: flex-start !important;
-    padding-top: 40px !important;
-    overflow-y: auto !important;
-}
-
-.modal-content {
-    background: white !important;
-    width: 95% !important;
-    max-width: 650px !important;
-    border-radius: 16px !important;
-    position: relative !important;
-    margin-bottom: 50px !important;
-    overflow: visible !important;
-}
-
-#modal-body {
-    padding: 0 !important;
-    width: 100% !important;
-}
-
 /* --- Consolidated Modal System --- */
 .modal-overlay {
+    display: none; /* Hidden by default */
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -611,9 +582,16 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; co
     border-radius: 20px !important;
     position: relative !important;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     margin-bottom: 40px !important;
-    min-height: 400px !important;
+    min-height: 200px !important;
+    max-height: calc(100vh - 80px) !important;
+}
+
+#modal-body {
+    padding: 0 !important;
+    width: 100% !important;
 }
 
 .close-btn {
